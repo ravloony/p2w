@@ -1,0 +1,23 @@
+{
+    "name": "ravloony/p2w",
+    "description": "Copy all data from Prestashop 1.6 to Wordpress",
+    "type": "project",
+    "require": {
+        "guzzlehttp/guzzle": "^6.3@dev",
+        "league/climate": "dev-master",
+        "league/booboo": "dev-master",
+        "vlucas/phpdotenv": "^3.3@dev",
+        "automattic/woocommerce": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.1@dev"
+    },
+    "license": "GPL2",
+    "authors": [
+        {
+            "name": "Tom Macdonald",
+            "email": "tm@thomas-macdonald.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
