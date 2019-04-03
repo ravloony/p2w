@@ -17,8 +17,6 @@ $client = new Client([
 	'auth' => [ $key, '' ]
 ]);
 
-$response = $client->request('GET', '/api');
-
 function getTarget($obj, $path) {
 	return array_reduce(explode('.', $path), function($carry, $item) {
 		return is_int($item) ? $carry[$item] : $carry->{$item};
@@ -33,17 +31,27 @@ function getAttr($obj, $attr, $namespace = 'http://www.w3.org/1999/xlink') {
 	return current($obj->attributes($namespace)->{$attr});
 }
 
-if ($response->getStatusCode() === 200) {
-	$prestashop = simplexml_load_string($response->getBody());
+$handleRemoteXml = function($url, $action) use ($client) {
+	$response = $client->request('GET', '/api');
+	if ($response->getStatusCode() === 200) {
+		$prestashop = simplexml_load_string($response->getBody());
+		if ($prestashop !== false) {
+			$action($prestashop);
+		}
+	}
+};
+
+$handleRemoteXml('api', function($prestashop) use ($handleRemoteXml) {
 	$products_url = getTargetAttr($prestashop, 'api.products', 'href');
 
-	$response = $client->request('GET', $products_url);
+	$handleRemoteXml($products_url, function($products_api) use ($handleRemoteXml) {
 
-	$prestashop = simplexml_load_string($response->getBody());
-
-	$products = getTarget($prestashop, 'products');
-	foreach($products->children() as $product) {
-		echo getAttr($product,'href');
-		echo "\n";
-	}
-}
+		$products = getTarget($products_api, 'products');
+		foreach($products->children() as $product_node) {
+			$product_url = getAttr($product_node,'href');
+			echo "$product_url\n";
+			$handleRemoteXml($product_url, function($product_api) use ($handleRemoteXml) {
+			});
+		}
+	});
+});
